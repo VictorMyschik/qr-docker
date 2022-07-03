@@ -63,6 +63,7 @@ services:
     volumes:
       - ./www:/var/www/src/
       - ./docker/php/nginx/php.ini:/usr/local/etc/php/php.ini
+      - ./logs:/var/www/xdebug/log
 
   mysql:
     image: mysql:8.0.0

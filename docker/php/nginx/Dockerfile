@@ -26,6 +26,7 @@ RUN set -x && \
     apt-get install --no-install-recommends --no-install-suggests -y \
         openssh-server \
         nodejs \
+        git \
         default-mysql-client \
         npm \
         bc \
@@ -39,7 +40,10 @@ RUN set -x && \
         libfreetype6-dev \
         libpng-dev \
         libjpeg62-turbo-dev \
-        && \
+         libmemcached11 \
+         libmemcachedutil2 \
+         libmemcached-dev \
+    && \
     apt-get install --no-install-recommends --no-install-suggests -y \
         # for composer
         #postgresql-client \
@@ -70,7 +74,23 @@ RUN set -x && \
     rm -rf /var/lib/apt/lists/* && \
     rm -rf /usr/share/nginx/html/*
 
+RUN cd /root \
+        && git clone https://github.com/php-memcached-dev/php-memcached \
+        && cd php-memcached \
+        && phpize \
+        && ./configure \
+        && make \
+        && make install \
+        && cd .. \
+        && rm -rf  php-memcached \
+        && echo extension=memcached.so >> /usr/local/etc/php/conf.d/memcached.ini \
+        && apt-get remove -y build-essential libmemcached-dev libz-dev \
+        && apt-get remove -y libmemcached-dev libz-dev \
+        && apt-get autoremove -y \
+        && rm -rf /var/lib/apt/lists/* \
+        && apt-get clean
+
 WORKDIR /var/www/src
 RUN chown -R www-data:www-data ./
-#COPY ../opcache.ini /usr/local/etc/php/conf.d/
+COPY opcache.ini /usr/local/etc/php/conf.d/
 EXPOSE 80
