@@ -1,0 +1,103 @@
+version: '3.7'
+
+networks:
+  frontend:
+    external:
+      name: proxy_proxy
+  backend:
+
+services:
+  nginx:
+    build: ./docker/nginx
+    container_name: nginx
+    restart: always
+    environment:
+      - VIRTUAL_HOST=rv.rental.test
+    links:
+      - php
+      - mysql
+      - phpmyadmin
+    volumes:
+      - ./www:/var/www/src
+      - ./logs/nginx:/var/log/nginx
+    ports:
+      - '9000:9000'
+    networks:
+      - frontend
+      - backend
+
+  php:
+    build: ./docker/php/nginx
+    restart: always
+    container_name: php
+    links:
+      - mysql
+      - phpmyadmin
+    networks:
+      - backend
+    environment:
+      - REACT_APP_API_URL=http://camping-world.local/api
+      - REACT_APP_API_KEY=j8qic5t3cvmniody
+      - PHP_APP_DB_TYPE=mysql
+      - PHP_APP_DB_SERVER=mysql
+      - PHP_APP_DB_USER=root
+      - PHP_APP_DB_PASSWORD=root123
+      - PHP_APP_DB_NAME=docker_demo
+      - PHP_APP_DB_PREFIX=cwrr__
+      - PHP_APP_DB_PERSISTENT=true
+      - PHP_APP_DB_FEDERATED=false
+      - PHP_APP_DB_ENGINE=InnoDB
+      - PHP_APP_DB_SSL=false
+      - PHP_APP_DB_SSL_CA=false
+      - PHP_APP_DB_SSL_CAPATH=false
+      - PHP_APP_DB_SSL_CERT=false
+      - PHP_APP_DB_SSL_CIPHER=false
+      - PHP_APP_DB_SSL_KEY=false
+      - PHP_APP_CACHE_TYPE=files
+      - PHP_APP_MASTER_PASSWORD=Profitroll13
+      - PHP_APP_DB_LOGGING=DB_LOGGING
+      - PHP_APP_DB_LOGGING_STORAGE=files
+      - COMPOSER_MEMORY_LIMIT=2G
+      - XDEBUG_CONFIG=client_host=192.168.227.1 client_port=9003 remote_enable=1
+      - PHP_IDE_CONFIG=serverName=Docker
+    volumes:
+      - ./www:/var/www/src/
+      - ./docker/php/nginx/php.ini:/usr/local/etc/php/php.ini
+
+  mysql:
+    image: mysql:8.0.0
+    restart: always
+    container_name: mysql
+    networks:
+      - backend
+    ports:
+      - '3306:3306'
+    volumes:
+      - './docker/mysql/config/mysql.cnf:/etc/mysql/conf.d/custom.cnf:ro'
+      - './docker/mysql/database:/var/lib/mysql'
+      - './docker/mysql/dump:/docker-entrypoint-initdb.d'
+    environment:
+      - MYSQL_USER=quintegro
+      - MYSQL_PASSWORD=quintegro
+      - MYSQL_ROOT_PASSWORD=root123
+      - MYSQL_DATABASE=docker_demo
+      - VIRTUAL_HOST=pma.rv.rental.test
+    command: mysqld --sql_mode="NO_ENGINE_SUBSTITUTION,NO_AUTO_CREATE_USER"
+
+  phpmyadmin:
+    image: library/phpmyadmin
+    container_name: phpmyadmin
+    networks:
+      - frontend
+      - backend
+    depends_on:
+      - mysql
+    environment:
+      PMA_USER: root
+      PMA_PASSWORD: root123
+      PMA_HOSTS: mysql
+      PMA_PORT: 3306
+      PMA_ARBITRARY: 1
+      VIRTUAL_HOST: pma.rv.rental.test
+    ports:
+      - '8080:80'
