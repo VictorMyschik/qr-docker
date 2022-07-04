@@ -93,4 +93,3 @@ RUN cd /root \
 WORKDIR /var/www/src
 RUN chown -R www-data:www-data ./
 COPY opcache.ini /usr/local/etc/php/conf.d/
-EXPOSE 80

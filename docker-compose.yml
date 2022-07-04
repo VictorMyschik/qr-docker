@@ -82,7 +82,6 @@ services:
       - MYSQL_PASSWORD=quintegro
       - MYSQL_ROOT_PASSWORD=root123
       - MYSQL_DATABASE=docker_demo
-      - VIRTUAL_HOST=pma.rv.rental.test
     command: mysqld --sql_mode="NO_ENGINE_SUBSTITUTION,NO_AUTO_CREATE_USER"
 
   phpmyadmin:
@@ -100,5 +99,3 @@ services:
       PMA_PORT: 3306
       PMA_ARBITRARY: 1
       VIRTUAL_HOST: pma.rv.rental.test
-    ports:
-      - '8080:80'
