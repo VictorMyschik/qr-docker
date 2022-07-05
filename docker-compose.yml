@@ -23,8 +23,10 @@ services:
     ports:
       - '9000:9000'
     networks:
-      - frontend
-      - backend
+      frontend:
+      backend:
+        aliases:
+          - rv.rental.test
 
   php:
     build: ./docker/php/nginx
@@ -58,8 +60,7 @@ services:
       - PHP_APP_DB_LOGGING=DB_LOGGING
       - PHP_APP_DB_LOGGING_STORAGE=files
       - COMPOSER_MEMORY_LIMIT=2G
-      - XDEBUG_CONFIG=client_host=192.168.227.1 client_port=9003 remote_enable=1
-      - PHP_IDE_CONFIG=serverName=Docker
+      - XDEBUG_SESSION="PHPSTORM"
     volumes:
       - ./www:/var/www/src/
       - ./docker/php/nginx/php.ini:/usr/local/etc/php/php.ini
